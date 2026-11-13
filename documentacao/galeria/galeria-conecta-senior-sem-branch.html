@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12375c">
+  <title>Conecta Sênior | Protótipo Mobile</title>
+  <style>
+    :root { color-scheme: light; --brand: #1557ad; --ink: #172537; --bg: #f5f7fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+    main { max-width: 940px; margin: auto; padding: 24px 16px 40px; }
+    header { text-align: center; margin-bottom: 14px; }
+    small { color: #587086; letter-spacing: .03em; font-weight: 600; }
+    h1 { margin: 7px 0; font-size: clamp(1.35rem, 3.6vw, 2.1rem); }
+    header p { color: #52697c; font-size: .94rem; }
+    .viewer { margin: auto; max-width: 770px; display: grid; grid-template-columns: 50px minmax(0, 1fr) 50px; align-items: center; gap: 8px; }
+    .screen { display: block; max-width: 100%; height: min(70vh, 730px); width: auto; margin: auto; border-radius: 8px; object-fit: contain; box-shadow: 0 8px 28px #1b416515; background: #fff; }
+    .arrow { border: 1px solid #cadef4; background: #fff; border-radius: 50%; height: 46px; width: 46px; font-size: 1.65rem; color: var(--brand); cursor: pointer; }
+    .arrow:hover:not(:disabled) { background: #eaf3ff; }
+    .arrow:disabled { opacity: .35; cursor: default; }
+    :focus-visible { outline: 3px solid #0873e7; outline-offset: 3px; }
+    .details { text-align: center; margin: 14px auto 0; }
+    #title { font-weight: 700; font-size: 1.08rem; }
+    #count { font-size: .85rem; color: #5e7388; margin-top: 5px; }
+    .dots { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 17px auto; }
+    .dot { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 50%; background: #c7d3e0; cursor: pointer; }
+    .dot[aria-current="true"] { background: var(--brand); transform: scale(1.18); }
+    #error { text-align: center; color: #a32020; min-height: 1.5em; font-size: .9rem; }
+    @media (max-width: 440px) {
+      main { padding: 12px 6px 24px; }
+      .viewer { grid-template-columns: 38px minmax(0, 1fr) 38px; gap: 3px; }
+      .arrow { width: 35px; height: 44px; border-radius: 9px; font-size: 1.25rem; }
+      .screen { height: min(72vh, 700px); }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <small>CONEXÃO ENTRE EXPERIÊNCIA E OPORTUNIDADE</small>
+    <h1>Protótipo Mobile — Conecta Sênior</h1>
+    <p>Use as setas para explorar as 10 telas na ordem do MVP.</p>
+  </header>
+
+  <section class="viewer" aria-label="Galeria de telas">
+    <button type="button" class="arrow" id="previous" aria-label="Tela anterior">&#8249;</button>
+    <img id="screen" class="screen" alt="Tela 01 — Boas-vindas">
+    <button type="button" class="arrow" id="next" aria-label="Próxima tela">&#8250;</button>
+  </section>
+
+  <section class="details" aria-live="polite">
+    <div id="title">Boas-vindas</div>
+    <div id="count">1 de 10</div>
+  </section>
+  <p id="error" role="status"></p>
+  <nav class="dots" id="dots" aria-label="Selecionar uma tela"></nav>
+</main>
+<script>
+  // Caminho relativo partindo de galeria/index.html no repositório.
+  // Não é preciso informar nome de branch ou endereço Raw.
+  // Estrutura: /galeria/index.html e /documentação/Imagens/imagem1.png ... imagem10.png
+  const IMAGE_BASE = '../documentação/Imagens/';
+
+  const titles = [
+    'Boas-vindas',
+    'Cadastro de usuário',
+    'Entrevista guiada',
+    'Currículo gerado por IA',
+    'Preferências profissionais',
+    'Vagas recomendadas',
+    'Detalhes da vaga',
+    'Confirmação de candidatura',
+    'Acompanhamento de candidaturas',
+    'Conversa com a empresa'
+  ];
+
+  const screen = document.getElementById('screen');
+  const count = document.getElementById('count');
+  const title = document.getElementById('title');
+  const prev = document.getElementById('previous');
+  const next = document.getElementById('next');
+  const dots = document.getElementById('dots');
+  const error = document.getElementById('error');
+  let current = 0;
+
+  for (let i = 0; i < titles.length; i++) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'dot';
+    button.setAttribute('aria-label', `Ir para a tela ${i + 1}: ${titles[i]}`);
+    button.addEventListener('click', () => show(i));
+    dots.appendChild(button);
+  }
+
+  function show(i) {
+    current = Math.min(titles.length - 1, Math.max(0, i));
+    error.textContent = '';
+    screen.src = `${IMAGE_BASE}imagem${current + 1}.png`;
+    screen.alt = `Tela ${String(current + 1).padStart(2, '0')} — ${titles[current]}`;
+    title.textContent = titles[current];
+    count.textContent = `${current + 1} de ${titles.length}`;
+    prev.disabled = current === 0;
+    next.disabled = current === titles.length - 1;
+    [...dots.children].forEach((button, index) => {
+      button.setAttribute('aria-current', String(index === current));
+    });
+    history.replaceState(null, '', `#tela-${String(current + 1).padStart(2, '0')}`);
+  }
+
+  screen.addEventListener('error', () => {
+    error.textContent = 'Não foi possível carregar esta imagem. Confira o nome, a pasta, a branch e a visibilidade do repositório.';
+  });
+  prev.addEventListener('click', () => show(current - 1));
+  next.addEventListener('click', () => show(current + 1));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') show(current - 1);
+    if (event.key === 'ArrowRight') show(current + 1);
+  });
+
+  const initial = Number((location.hash.match(/^#tela-(\d+)$/) || [])[1]);
+  show(initial >= 1 && initial <= titles.length ? initial - 1 : 0);
+</script>
+</body>
+</html>
