@@ -57,10 +57,10 @@
   <nav class="dots" id="dots" aria-label="Selecionar uma tela"></nav>
 </main>
 <script>
-  // Caminho relativo partindo de galeria/index.html no repositório.
-  // Não é preciso informar nome de branch ou endereço Raw.
-  // Estrutura: /galeria/index.html e /documentação/Imagens/imagem1.png ... imagem10.png
-  const IMAGE_BASE = '../Imagens/imagem1.png';
+  // Arquivo: documentacao/galeria/index.html
+  // Imagens: documentacao/Imagens/imagem1.png ... imagem10.png
+  // O caminho é relativo ao arquivo index.html, não à branch.
+  const IMAGE_BASE = '../Imagens/';
 
   const titles = [
     'Boas-vindas',
@@ -105,11 +105,12 @@
     [...dots.children].forEach((button, index) => {
       button.setAttribute('aria-current', String(index === current));
     });
-    history.replaceState(null, '', `#tela-${String(current + 1).padStart(2, '0')}`);
+    // Mantém o marcador #tela-01 e remove parâmetros extras como ?utm_source=chatgpt.com.
+    history.replaceState(null, '', `${location.pathname}#tela-${String(current + 1).padStart(2, '0')}`);
   }
 
   screen.addEventListener('error', () => {
-    error.textContent = 'Não foi possível carregar esta imagem. Confira o nome, a pasta, a branch e a visibilidade do repositório.';
+    error.textContent = 'Não foi possível carregar esta imagem. Confira se o arquivo existe em documentacao/Imagens/ e se o nome está correto.';
   });
   prev.addEventListener('click', () => show(current - 1));
   next.addEventListener('click', () => show(current + 1));
